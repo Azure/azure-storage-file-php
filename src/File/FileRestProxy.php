@@ -153,27 +153,21 @@ class FileRestProxy extends ServiceRestProxy implements IFile
      */
     private function createPath($share, $directory = '')
     {
-        if (empty($directory)) {
-            if (!empty($share)) {
-                return $share;
-            } else {
-                return '/' . $share;
-            }
-        } else {
-            $encodedFile = urlencode($directory);
-            // Unencode the forward slashes to match what the server expects.
-            $encodedFile = str_replace('%2F', '/', $encodedFile);
-            // Unencode the backward slashes to match what the server expects.
-            $encodedFile = str_replace('%5C', '/', $encodedFile);
-            // Re-encode the spaces (encoded as space) to the % encoding.
-            $encodedFile = str_replace('+', '%20', $encodedFile);
-            // Empty share means accessing default share
-            if (empty($share)) {
-                return $encodedFile;
-            } else {
-                return '/' . $share . '/' . $encodedFile;
-            }
+        if (empty($directory) && ($directory != '0')) {
+            return empty($share) ? '/' : $share;
         }
+        $encodedFile = urlencode($directory);
+        // Unencode the forward slashes to match what the server expects.
+        $encodedFile = str_replace('%2F', '/', $encodedFile);
+        // Unencode the backward slashes to match what the server expects.
+        $encodedFile = str_replace('%5C', '/', $encodedFile);
+        // Re-encode the spaces (encoded as space) to the % encoding.
+        $encodedFile = str_replace('+', '%20', $encodedFile);
+        // Empty share means accessing default share
+        if (empty($share)) {
+            return $encodedFile;
+        }
+        return '/' . $share . '/' . $encodedFile;
     }
 
     /**
@@ -567,7 +561,6 @@ class FileRestProxy extends ServiceRestProxy implements IFile
         Validate::notNullOrEmpty($share, 'share');
 
         $method      = Resources::HTTP_PUT;
-        $headers     = array();
         $postParams  = array();
         $queryParams = array(Resources::QP_REST_TYPE => 'share');
         $path        = $this->createPath($share);
@@ -863,7 +856,6 @@ class FileRestProxy extends ServiceRestProxy implements IFile
         $postParams  = array();
         $queryParams = array();
         $path        = $this->createPath($share);
-        $statusCode  = Resources::STATUS_OK;
 
         if (is_null($options)) {
             $options = new FileServiceOptions();
@@ -1219,7 +1211,6 @@ class FileRestProxy extends ServiceRestProxy implements IFile
         Validate::notNullOrEmpty($path, 'path');
 
         $method      = Resources::HTTP_PUT;
-        $headers     = array();
         $postParams  = array();
         $queryParams = array(Resources::QP_REST_TYPE => 'directory');
         $path        = $this->createPath($share, $path);
@@ -1595,7 +1586,6 @@ class FileRestProxy extends ServiceRestProxy implements IFile
         Validate::isInteger($size, 'size');
 
         $method      = Resources::HTTP_PUT;
-        $headers     = array();
         $postParams  = array();
         $queryParams = array();
         $path        = $this->createPath($share, $path);
@@ -2661,7 +2651,6 @@ class FileRestProxy extends ServiceRestProxy implements IFile
         Validate::notNullOrEmpty($sourcePath, 'sourcePath');
 
         $method      = Resources::HTTP_PUT;
-        $headers     = array();
         $queryParams = array();
         $postParams  = array();
         $path        = $this->createPath($share, $path);
