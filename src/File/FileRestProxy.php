@@ -410,6 +410,9 @@ class FileRestProxy extends ServiceRestProxy implements IFile
                 $size
             );
 
+            // Stop Guzzle adding content-type header which may block SharedKey authentication
+            $headers[Resources::CONTENT_TYPE] = Resources::EMPTY_STRING;
+
             if ($useTransactionalMD5) {
                 $contentMD5 = base64_encode(md5($chunkContent, true));
                 $this->addOptionalHeader(
@@ -2274,6 +2277,9 @@ class FileRestProxy extends ServiceRestProxy implements IFile
             'range'
         );
 
+        // Stop Guzzle adding content-type header which may block SharedKey authentication
+        $headers[Resources::CONTENT_TYPE] = Resources::EMPTY_STRING;
+
         return $this->sendAsync(
             $method,
             $headers,
@@ -2355,7 +2361,7 @@ class FileRestProxy extends ServiceRestProxy implements IFile
                     $useTransactionalMD5
                 );
             }, null);
-        } else {
+        } elseif ($size > 0) {
             return $promise->then(function ($response) use (
                 $share,
                 $path,
@@ -2371,6 +2377,8 @@ class FileRestProxy extends ServiceRestProxy implements IFile
                     $putOptions
                 );
             }, null);
+        } else {
+            return $promise;
         }
     }
 
